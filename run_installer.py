@@ -1,15 +1,36 @@
 from pywinauto.application import Application
-import os
+from pywinauto.keyboard import send_keys
+from pywinauto.controls.win32_controls import ButtonWrapper
+import time
 
-# Note: You must open the terminal window in administrator mode in order for this script to be able to run the installer.
+# Here's a path: "C:\Users\nathan_pulsemedica\Downloads\FSS-Setup-v1.2.0.386.exe"
+# Here's another path: "C:\Users\nathan_pulsemedica\Downloads\FSS-Setup-v1.2.0.383.exe"
+# Notes:
+# - Installing to the same path will automatically delete the old version.
+# - You must have VSCode / terminal open in admin mode.
+
+# Paths:
 installer_path = input("Enter the path to the installer: ")
 installer_path = installer_path.strip('""')
-current_user = os.getlogin()
-install_path = f"C:/Users/{current_user}/Desktop/FSS_Tested"
+install_path = "C:\FSS_Tested"
 
+# Open the installer
 app = Application(backend="win32").start(installer_path)
-install_dialog = app.InstallDialog
-install_dialog.wait('ready', timeout=30)  # Wait for the dialog to be ready (doesn't seem to be working)
+main_window = app.window()
+time.sleep(5) # Make sure the main window is ready first.
 
-# The script is finishing before we can enter keys...
-install_dialog.type_keys(install_path)
+# Enter path to install at.
+main_window.set_focus()
+send_keys(install_path)
+
+# Click the "install" button
+main_window.next_button.click();
+
+# Check the "Run Auto Configuration" toggle. Wait for install to finish.
+time.sleep(12)
+checkbox = ButtonWrapper(main_window.TCheckBox.wrapper_object())
+checkbox.click()
+
+# Click the "finish" button.
+time.sleep(2)
+main_window.finish_button.click()
